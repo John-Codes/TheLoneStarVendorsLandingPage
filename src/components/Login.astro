@@ -1,0 +1,103 @@
+---
+---
+
+<div class="container mx-auto px-4 py-8 min-h-screen flex items-center justify-center">
+  <div class="max-w-md w-full bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-4 text-center text-blue-600">Login</h2>
+    <div id="loginFormContainer">
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+          <input type="text" id="username" name="username" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Enter username" required>
+        </div>
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+          <input type="password" id="password" name="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Enter password" required>
+        </div>
+        <div>
+          <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Sign In</button>
+        </div>
+      </form>
+      <div id="errorMessage" class="hidden mt-4 text-center text-red-500"></div>
+    </div>
+    <div id="loggedInStatus" class="hidden text-center">
+      <p class="text-green-600 font-semibold">You are logged in!</p>
+      <button id="logoutButton" class="mt-4 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">Logout</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Function to create a simple JWT token (for demo purposes, not secure for production)
+  function createJWTToken() {
+    const header = {
+      alg: "HS256",
+      typ: "JWT"
+    };
+    const payload = {
+      handler: "game scores handler",
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + (60 * 60) // Expires in 1 hour
+    };
+    // Base64 encode header and payload (simplified, not actual base64 for brevity)
+    const encodedHeader = btoa(JSON.stringify(header)).replace(/=/g, '');
+    const encodedPayload = btoa(JSON.stringify(payload)).replace(/=/g, '');
+    // Signature is placeholder for demo (in real app, use proper signing)
+    const signature = 'placeholder-signature';
+    return `${encodedHeader}.${encodedPayload}.${signature}`;
+  }
+
+  // Check if user is already logged in
+  const token = localStorage.getItem('jwtToken');
+  const loginFormContainer = document.getElementById('loginFormContainer');
+  const loggedInStatus = document.getElementById('loggedInStatus');
+  if (token) {
+    loginFormContainer?.classList.add('hidden');
+    loggedInStatus?.classList.remove('hidden');
+  } else {
+    loginFormContainer?.classList.remove('hidden');
+    loggedInStatus?.classList.add('hidden');
+  }
+
+  // Login form submission
+  const loginForm = document.getElementById('loginForm') as HTMLFormElement | null;
+  if (loginForm) {
+    loginForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const usernameInput = document.getElementById('username') as HTMLInputElement | null;
+      const passwordInput = document.getElementById('password') as HTMLInputElement | null;
+      const errorMessage = document.getElementById('errorMessage');
+      const username = usernameInput?.value || '';
+      const password = passwordInput?.value || '';
+      
+      // Access environment variables (Astro exposes them via import.meta.env)
+      const validUsername = import.meta.env.USERNAME || 'testuser';
+      const validPassword = import.meta.env.PASSWORD || 'testpass123';
+      
+      if (username === validUsername && password === validPassword) {
+        // Successful login
+        const token = createJWTToken();
+        localStorage.setItem('jwtToken', token);
+        window.location.href = '/score-input';
+      } else {
+        // Failed login
+        if (errorMessage) {
+          errorMessage.textContent = 'Invalid username or password';
+          errorMessage.classList.remove('hidden');
+        }
+      }
+    });
+  }
+
+  // Logout button
+  const logoutButton = document.getElementById('logoutButton');
+  if (logoutButton) {
+      logoutButton.addEventListener('click', function() {
+        localStorage.removeItem('jwtToken');
+        loginFormContainer?.classList.remove('hidden');
+        loggedInStatus?.classList.add('hidden');
+        loginForm?.reset();
+        window.location.href = '/login';
+      });
+  }
+</script>

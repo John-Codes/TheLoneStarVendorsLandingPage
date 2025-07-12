@@ -1,0 +1,68 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+  <div class="container mx-auto px-4 py-8 min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-2xl font-bold mb-4 text-center text-blue-600">Score Input</h2>
+      <div id="scoreInputContainer" class="hidden">
+        <form id="scoreForm" class="space-y-4">
+          <div>
+            <label for="playerName" class="block text-sm font-medium text-gray-700">Player Name</label>
+            <input type="text" id="playerName" name="playerName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Enter player name" required>
+          </div>
+          <div>
+            <label for="score" class="block text-sm font-medium text-gray-700">Score</label>
+            <input type="number" id="score" name="score" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Enter score" required>
+          </div>
+          <div>
+            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Submit Score</button>
+          </div>
+        </form>
+        <div id="apiResponse" class="hidden mt-4 text-center text-green-600"></div>
+      </div>
+      <div id="notLoggedIn" class="text-center">
+        <p class="text-red-500 font-semibold">You are not logged in. Please <a href="/login" class="text-blue-600 hover:underline">login</a> to input scores.</p>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // Check if user is logged in by checking for JWT token
+  const token = localStorage.getItem('jwtToken');
+  const scoreInputContainer = document.getElementById('scoreInputContainer');
+  const notLoggedIn = document.getElementById('notLoggedIn');
+  
+  if (token) {
+    scoreInputContainer?.classList.remove('hidden');
+    notLoggedIn?.classList.add('hidden');
+  } else {
+    scoreInputContainer?.classList.add('hidden');
+    notLoggedIn?.classList.remove('hidden');
+  }
+
+  // Score form submission (placeholder for API call)
+  const scoreForm = document.getElementById('scoreForm') as HTMLFormElement | null;
+  if (scoreForm) {
+      scoreForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const playerNameInput = document.getElementById('playerName') as HTMLInputElement | null;
+        const scoreInput = document.getElementById('score') as HTMLInputElement | null;
+        const apiResponse = document.getElementById('apiResponse');
+        const playerName = playerNameInput?.value || '';
+        const score = scoreInput?.value || '';
+        
+        if (token && apiResponse) {
+          // Placeholder for API call using the JWT token
+          apiResponse.textContent = `Score ${score} for player ${playerName} submitted successfully (API call placeholder). Token used: ${token.substring(0, 10)}...`;
+          apiResponse.classList.remove('hidden');
+          scoreForm.reset();
+        } else if (apiResponse) {
+          apiResponse.textContent = 'Error: Not logged in or token missing.';
+          apiResponse.classList.remove('hidden');
+        }
+      });
+  }
+</script>
